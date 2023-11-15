@@ -1,10 +1,9 @@
-#include <stdarg.h>
-#include <unistd.h>
-#include <string.h>
 #include "main.h"
-#include <stdio.h>
+
+void print_buffer(char buffer[], int *buff);
+
 /**
- * _printf - Custom printf function
+ * _printf - The custopm _printf function.
  * @format: Format string
  *
  * Return: Number of characters printed (excluding null byte)
@@ -12,44 +11,62 @@
 int _printf(const char *format, ...)
 {
 	va_list args;
-	int count = 0;
-	const char *ptr;
+	char buffer[BUFF_SIZE];
 
+	int ptr, printed = 0, printed_chars = 0;
+	int flags, width, precision, size, buff_index = 0;
+
+	if (format == NULL)
+		return (-1);
+
+	/* Call va_start macro */
 	va_start(args, format);
 
-	for (ptr = format; *ptr != '\0'; ptr++)
+	/* Loop through format string for modifier */
+	for (ptr = 0; format && format[ptr] != '\0'; ptr++)
 	{
-		if (*ptr == '%')
+		if (format[ptr] != '%')
 		{
-			ptr++;
-			switch (*ptr)
-			{
-				case 'c':
-					count += _putchar(va_arg(args, int));
-					break;
-				case 's':
-					{
-						char *str = va_arg(args, char *);
-
-						count += write(1, str, strlen(str));
-					}
-					break;
-				case '%':
-					count += write(1, "%", 1);
-					break;
-				default:
-					count += write(1, "%", 1);
-					count += write(1, &(*ptr), 1);
-					break;
-			}
+			buffer[buff_index++] = format[ptr];
+			if (buff_index == BUFF_SIZE)
+				print_buffer(buffer, &buff_index);
+			printed_chars++;
 		}
 		else
 		{
-			count += _putchar(*ptr);
+			print_buffer(buffer, &buff_index);
+			flags = get_flags(format, &ptr);
+			width = get_width(format, &ptr, args);
+			precision = get_precision(format, &ptr, args);
+			size = get_size(format, &ptr);
+			++ptr;
+
+			printed = do_print(format, &ptr, args, buffer,
+					flags, width, precision, size);
+
+			if (printed == -1)
+				return (-1);
+
+			printed_chars += printed;
 		}
 	}
 
+	print_buffer(buffer, &buff_index);
+
 	va_end(args);
 
-	return (count);
+	return (printed_chars);
+}
+
+/**
+ * print_buffer - Prints the content of the buffer
+ * @buffer: Array of characters
+ * @buff_index: Index at which to add next char, also length
+ */
+void print_buffer(char buffer[], int *buff_index)
+{
+	if (*buff_index > 0)
+		write(1, &buffer[0], *buff_index);
+
+	*buff_index = 0;
 }
