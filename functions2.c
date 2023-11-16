@@ -146,7 +146,7 @@ for (y = 0; in[y]; y++)
 {
 if (in[y] == string[x])
 {
-x = out[y];
+a = out[y];
 write(1, &a, 1);
 counter++;
 break;
@@ -154,7 +154,7 @@ break;
 }
 if (!in[y])
 {
-x = string[x];
+a = string[x];
 write(1, &a, 1);
 counter++;
 }
