@@ -191,6 +191,6 @@ int print_binary(va_list args, char buffer[],
 			count++;
 		}
 	}
-  
+
 	return (count);
 }
